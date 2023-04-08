@@ -1,16 +1,15 @@
 import Head from "next/head";
 import { useState } from "react";
-import endent from "endent";
 import "bootstrap/dist/css/bootstrap.css";
 import Answer from "@/components/Answer";
 import Question from "@/components/Question";
+import Loading from "@/components/Loading";
 
 export default function Home() {
 	const [query, setQuery] = useState("");
 	const [answer, setAnswer] = useState("");
 	const [question, setQuestion] = useState("");
 	const [previousAnswers, setPreviousAnswers] = useState([]);
-	const [chunks, setChunks] = useState([]);
 	const [loading, setLoading] = useState(false);
 
 	const handleAnswer = async () => {
@@ -30,22 +29,23 @@ export default function Home() {
 			return;
 		}
 		const results = await searchResponse.json();
-		setChunks(results);
-		console.log(results);
 
-		const prompt = endent`
-    Answer the question based on the context below. Your answer must be based on the context, otherwise say "I don't know."
+		console.log("results", results);
 
-    Context: ${results.map((chunk) => chunk.content).join("\n")}
+		let tokenCount = 0;
+		let contextText = "";
 
-    Question: """
-    ${query}
-    """
+		for (let i = 0; i < results.length; i++) {
+			const result = results[i];
+			const content = result.content;
+			tokenCount += result.content_tokens;
 
-    Answer as markdown (if there is a code snippet include it in the answer):
-    `;
+			if (tokenCount >= 1500) {
+				break;
+			}
 
-		console.log(prompt);
+			contextText += `${content.trim()}\n---\n`;
+		}
 
 		setQuery("");
 
@@ -54,7 +54,10 @@ export default function Home() {
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ prompt }),
+			body: JSON.stringify({
+				query,
+				contextText,
+			}),
 		});
 
 		if (!answerResponse.ok) {
@@ -113,18 +116,7 @@ export default function Home() {
 				</div>
 				<div>
 					<Question question={question} />
-					{loading ? (
-						<div className="mb-4">
-							<span
-								className="spinner-grow spinner-grow-sm"
-								role="status"
-								aria-hidden="true"
-							/>{" "}
-							Loading...
-						</div>
-					) : (
-						<Answer answer={answer} />
-					)}
+					{loading ? <Loading /> : <Answer answer={answer} />}
 				</div>
 				<section className="small">
 					{previousAnswers.map(({ question, answer }, index) => {

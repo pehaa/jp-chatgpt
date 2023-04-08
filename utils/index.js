@@ -1,12 +1,78 @@
 import { createClient } from "@supabase/supabase-js";
 import { createParser } from "eventsource-parser";
+import { codeBlock, oneLine } from "common-tags";
+import { ChatCompletionRequestMessageRoleEnum } from "openai";
 
 export const supabaseAdmin = createClient(
 	process.env.NEXT_PUBLIC_SUPABASE_URL,
 	process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export const OpenAIStream = async (prompt) => {
+export const OpenAIStream = async (query, contextText) => {
+	const messages = [
+		{
+			role: ChatCompletionRequestMessageRoleEnum.System,
+			content: codeBlock`
+            ${oneLine`
+              You are a very enthusiastic Jetpack AI who loves
+              to help people! Given the following information from
+              the Jetpack documentation, answer the user's question using
+              only that information, outputted in markdown format.
+            `}
+  
+            ${oneLine`
+              If you are unsure
+              and the answer is not explicitly written in the documentation, say
+              "Sorry, I don't know how to help with that."
+            `}
+            
+            ${oneLine`
+              Include related code snippets if available.
+            `}
+          `,
+		},
+		{
+			role: ChatCompletionRequestMessageRoleEnum.User,
+			content: codeBlock`
+            Here is the Jetpack documentation:
+            ${contextText}
+          `,
+		},
+		{
+			role: ChatCompletionRequestMessageRoleEnum.User,
+			content: codeBlock`
+            ${oneLine`
+              Answer my next question using only the above documentation.
+              You must also follow the below rules when answering:
+            `}
+            ${oneLine`
+              - Do not make up answers that are not provided in the documentation.
+            `}
+            ${oneLine`
+              - If you are unsure and the answer is not explicitly written
+              in the documentation context, say
+              "Sorry, I don't know how to help with that."
+            `}
+            ${oneLine`
+              - Prefer splitting your response into multiple paragraphs.
+            `}
+            ${oneLine`
+              - Do not add additional information that you are not asked for.
+            `}
+            ${oneLine`
+              - Output as markdown with code snippets if available.
+            `}
+          `,
+		},
+		{
+			role: ChatCompletionRequestMessageRoleEnum.User,
+			content: codeBlock`
+            Here is my question:
+            ${oneLine`${query}`}
+        `,
+		},
+	];
+
 	const response = await fetch("https://api.openai.com/v1/chat/completions", {
 		method: "POST",
 		headers: {
@@ -15,18 +81,8 @@ export const OpenAIStream = async (prompt) => {
 		},
 		body: JSON.stringify({
 			model: "gpt-3.5-turbo",
-			messages: [
-				{
-					role: "system",
-					content:
-						"You are a helpful, enthusiastic assistant that aswer questions about Jetpack.",
-				},
-				{
-					role: "user",
-					content: prompt,
-				},
-			],
-			max_tokens: 150,
+			messages,
+			max_tokens: 512,
 			temperature: 0,
 			stream: true,
 		}),
