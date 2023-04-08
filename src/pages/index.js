@@ -36,7 +36,6 @@ export default function Home() {
 		const prompt = endent`
     Answer the question based on the context below. Your answer must be based on the context, otherwise say "I don't know."
 
-    
     Context: ${results.map((chunk) => chunk.content).join("\n")}
 
     Question: """
@@ -114,7 +113,18 @@ export default function Home() {
 				</div>
 				<div>
 					<Question question={question} />
-					{loading ? <div>Loading...</div> : <Answer answer={answer} />}
+					{loading ? (
+						<div className="mb-4">
+							<span
+								className="spinner-grow spinner-grow-sm"
+								role="status"
+								aria-hidden="true"
+							/>{" "}
+							Loading...
+						</div>
+					) : (
+						<Answer answer={answer} />
+					)}
 				</div>
 				<section className="small">
 					{previousAnswers.map(({ question, answer }, index) => {

@@ -13,6 +13,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.15.0",
     "bootstrap": "^5.2.3",
+    "common-tags": "^1.8.2",
     "endent": "^2.1.0",
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
