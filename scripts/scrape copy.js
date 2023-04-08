@@ -116,7 +116,7 @@ const chunkContent = async (contentObj) => {
 		content: contentArray,
 	};
 
-	fs.writeFile("content-sections.json", JSON.stringify(json), function (err) {
+	fs.writeFile("content.json", JSON.stringify(json), function (err) {
 		if (err) {
 			return console.log(err);
 		}

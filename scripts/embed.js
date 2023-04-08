@@ -29,7 +29,7 @@ const generateEmbeddings = async (content) => {
 			const [{ embedding }] = embeddingResponse.data.data;
 
 			const { data, error } = await supabase
-				.from("jp_support")
+				.from(process.env.TABLE_NAME)
 				.insert({
 					title: chunk.title,
 					url: chunk.url,

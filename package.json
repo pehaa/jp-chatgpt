@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.15.0",
+    "bootstrap": "^5.2.3",
     "endent": "^2.1.0",
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
@@ -19,7 +20,8 @@
     "next": "13.2.4",
     "openai": "^3.2.1",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-markdown": "^8.0.6"
   },
   "devDependencies": {
     "@next/env": "^13.3.0",

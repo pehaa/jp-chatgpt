@@ -19,7 +19,7 @@ export const OpenAIStream = async (prompt) => {
 				{
 					role: "system",
 					content:
-						"You are a helpful assistant that aswer questions about Jetpack.",
+						"You are a helpful, enthusiastic assistant that aswer questions about Jetpack.",
 				},
 				{
 					role: "user",
