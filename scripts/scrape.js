@@ -4,7 +4,7 @@ import { encode } from "gpt-3-encoder";
 import fs from "fs";
 
 const BASE_URL = "https://jetpack.com";
-const CHUNK_SIZE = 200;
+const CHUNK_SIZE = 300;
 const startPath = "/sitemap-1.xml";
 const supportPath = `https://jetpack.com/support/`;
 const blogPath = `https://jetpack.com/blog/`;
@@ -24,22 +24,12 @@ const getLinks = async () => {
 	});
 };
 
-const getContent = async (url) => {
-	const html = await axios.get(url);
-	const $ = cheerio.load(html.data);
-	const content = $(".jetpack_support");
-
-	// remove get help & related posts
-	content.find("#get-help").parent().remove();
-	content.find("#jp-relatedposts").parent().remove();
-	const text = content.text();
-	let cleanedText = text.replace(/\s+/g, " ");
-	cleanedText = cleanedText.replace(/\.([a-zA-Z])/g, ". $1");
+const getContent = async (section) => {
+	let cleanedText = section.content.replace(/\s+/g, " ");
 	cleanedText = cleanedText.trim();
-	//console.log(cleanedText);
+	console.log(cleanedText);
 	return {
-		title: $("h1").text(),
-		url,
+		...section,
 		content: cleanedText,
 		length: cleanedText.length,
 		tokens: encode(cleanedText).length,
@@ -47,8 +37,43 @@ const getContent = async (url) => {
 	};
 };
 
-const chunkContent = async (contentObj) => {
-	const { title, url, content, tokens } = contentObj;
+const getSections = async (url) => {
+	const html = await axios.get(url);
+	const $ = cheerio.load(html.data);
+	const title = $("h1").text();
+	const content = $(".jetpack_support");
+
+	// remove get help & related posts
+	content.find("#get-help").parent().remove();
+	content.find("#jp-relatedposts").parent().remove();
+
+	const sections = content
+		.find("h1, h2, h3, summary")
+		.map((i, heading) => {
+			const content = $(heading)
+				.nextUntil("h1, h2, h3, summary, details")
+				.map((idx, p) => $(p).text())
+				.get()
+				.join();
+			let sectionTitle = $(heading).text().trim();
+			sectionTitle = sectionTitle[sectionTitle.length - 1]?.match(/[a-z0-9]/i)
+				? sectionTitle + "."
+				: sectionTitle;
+			return {
+				url,
+				title,
+				sectionTitle,
+				content: `${sectionTitle}  ${content}`,
+			};
+		})
+		.get();
+
+	return sections.filter((el) => el.content.trim());
+};
+
+const chunkContent = async (sectionObj) => {
+	const { title, sectionTitle, url, content, tokens } = sectionObj;
+	console.log(tokens, url);
 	const contentChunks = [];
 	if (tokens > CHUNK_SIZE) {
 		const sentences = content.split(". ");
@@ -77,6 +102,7 @@ const chunkContent = async (contentObj) => {
 	const chunks = contentChunks.map((chunk) => {
 		return {
 			title,
+			sectionTitle,
 			url,
 			content: chunk,
 			length: chunk.length,
@@ -94,33 +120,41 @@ const chunkContent = async (contentObj) => {
 			}
 		}
 	}
-	console.log(chunks);
+	//console.log(chunks);
 	return {
-		...contentObj,
+		...sectionObj,
 		chunks,
 	};
 };
 
 (async () => {
+	// list of pages to scrape - I am using the sitemap.xml and scrapping only /support/{...} pages
 	const links = await getLinks();
-	//console.log(links);
+	console.log(links);
 	const contentArray = [];
 
+	getSections(
+		"https://jetpack.com/support/jetpack-social/social-sharing-new-posts/"
+	);
+
 	for (const link of links) {
-		const content = await getContent(link);
-		const chunkedContent = await chunkContent(content);
-		contentArray.push(chunkedContent);
+		const sections = await getSections(link);
+		for (const section of sections) {
+			const content = await getContent(section);
+
+			const chunkedContent = await chunkContent(content);
+			contentArray.push(chunkedContent);
+		}
 	}
 	const json = {
 		totalTokens: contentArray.reduce((acc, curr) => acc + curr.tokens, 0),
 		content: contentArray,
 	};
 
-	fs.writeFile("content-sections.json", JSON.stringify(json), function (err) {
+	fs.writeFile("content-sections-1.json", JSON.stringify(json), function (err) {
 		if (err) {
 			return console.log(err);
 		}
 		console.log("The file was saved!");
 	});
-	tt;
 })();
