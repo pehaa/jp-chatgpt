@@ -17,7 +17,6 @@ export default function Home() {
 		setPreviousAnswers((prev) => [{ question, answer }, ...prev]);
 		setLoading(true);
 		setAnswer("");
-		setQuery("");
 		setQuestion(query);
 		const searchResponse = await fetch("/api/search", {
 			method: "POST",
@@ -41,11 +40,15 @@ export default function Home() {
     Context: ${results.map((chunk) => chunk.content).join("\n")}
 
     Question: """
-    ${question}
+    ${query}
     """
 
     Answer as markdown (if there is a code snippet include it in the answer):
     `;
+
+		console.log(prompt);
+
+		setQuery("");
 
 		const answerResponse = await fetch("/api/answer", {
 			method: "POST",

@@ -23,8 +23,8 @@ const handler = async (req) => {
 
 		const { data: chunks, error } = await supabaseAdmin.rpc("jp_search", {
 			query_embedding: embedding,
-			similarity_threshold: 0.01,
-			match_count: 5,
+			similarity_threshold: 0.78,
+			match_count: 10,
 		});
 		if (error) {
 			console.log(error);
