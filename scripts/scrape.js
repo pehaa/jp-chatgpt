@@ -27,7 +27,7 @@ const getLinks = async () => {
 const getContent = async (section) => {
 	let cleanedText = section.content.replace(/\s+/g, " ");
 	cleanedText = cleanedText.trim();
-	console.log(cleanedText);
+	//console.log(cleanedText);
 	return {
 		...section,
 		content: cleanedText,
@@ -47,14 +47,40 @@ const getSections = async (url) => {
 	content.find("#get-help").parent().remove();
 	content.find("#jp-relatedposts").parent().remove();
 
-	const sections = content
-		.find("h1, h2, h3, summary")
-		.map((i, heading) => {
-			const content = $(heading)
-				.nextUntil("h1, h2, h3, summary, details")
+	const introSection = content
+		.find(".entry-content > p:first-child")
+		.map((i, intro) => {
+			const content = $(intro)
+				.nextUntil("h2, h3, summary, details")
 				.map((idx, p) => $(p).text())
 				.get()
-				.join();
+				.join(" ");
+			const sectionTitle = title[title.length - 1]?.match(/[a-z0-9]/i)
+				? title + "."
+				: title;
+			return {
+				url,
+				title,
+				sectionTitle: title,
+				content: `${sectionTitle} ${$(intro).text()} ${content}`,
+			};
+		})
+		.get();
+
+	console.log("intro section", introSection);
+
+	const introSectionTitle = title[title.length - 1]?.match(/[a-z0-9]/i)
+		? title + "."
+		: title;
+
+	let sections = content
+		.find("h2, h3, summary")
+		.map((i, heading) => {
+			const content = $(heading)
+				.nextUntil("h2, h3, summary, details")
+				.map((idx, p) => $(p).text())
+				.get()
+				.join(" ");
 			let sectionTitle = $(heading).text().trim();
 			sectionTitle = sectionTitle[sectionTitle.length - 1]?.match(/[a-z0-9]/i)
 				? sectionTitle + "."
@@ -68,7 +94,15 @@ const getSections = async (url) => {
 		})
 		.get();
 
-	return sections.filter((el) => el.content.trim());
+	sections = [...introSection, ...sections];
+
+	sections = sections.filter(
+		(el) => el.content.trim().length > el.sectionTitle.length + 10
+	);
+
+	console.log(sections.map((el) => el.sectionTitle));
+
+	return sections;
 };
 
 const chunkContent = async (sectionObj) => {
@@ -132,10 +166,6 @@ const chunkContent = async (sectionObj) => {
 	const links = await getLinks();
 	console.log(links);
 	const contentArray = [];
-
-	getSections(
-		"https://jetpack.com/support/jetpack-social/social-sharing-new-posts/"
-	);
 
 	for (const link of links) {
 		const sections = await getSections(link);

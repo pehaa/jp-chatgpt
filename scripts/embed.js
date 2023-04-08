@@ -5,6 +5,8 @@ import { createClient } from "@supabase/supabase-js";
 
 const { loadEnvConfig } = pkg;
 
+const TABLE_NAME = "jp_support_sections";
+
 loadEnvConfig("");
 
 const generateEmbeddings = async (content) => {
@@ -29,9 +31,10 @@ const generateEmbeddings = async (content) => {
 			const [{ embedding }] = embeddingResponse.data.data;
 
 			const { data, error } = await supabase
-				.from(process.env.TABLE_NAME)
+				.from(TABLE_NAME)
 				.insert({
 					title: chunk.title,
+					section_title: chunk.sectionTitle,
 					url: chunk.url,
 					content: chunk.content,
 					content_tokens: chunk.tokens,
@@ -51,6 +54,6 @@ const generateEmbeddings = async (content) => {
 };
 
 (async () => {
-	const json = JSON.parse(fs.readFileSync("content.json", "utf8"));
+	const json = JSON.parse(fs.readFileSync("content-sections-1.json", "utf8"));
 	await generateEmbeddings(json.content);
 })();
