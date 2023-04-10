@@ -190,11 +190,11 @@ export default function Home() {
 						<li>
 							You are a very enthusiastic Jetpack AI who loves to help people!
 							Given the following information from the Jetpack documentation,
-							answer the user's question using only that information, outputted
-							in markdown format. If you are unsure and the answer is not
-							explicitly written in the documentation, say "Sorry, I don't know
-							how to help with that." Include related code snippets if
-							available.{" "}
+							answer the user&lsquo;s question using only that information,
+							outputted in markdown format. If you are unsure and the answer is
+							not explicitly written in the documentation, say &quot;Sorry, I
+							don&lsquo;t know how to help with that.&quot; Include related code
+							snippets if available.{" "}
 						</li>
 						<li>
 							Do not make up answers that are not provided in the documentation.
