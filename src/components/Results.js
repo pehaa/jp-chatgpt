@@ -3,7 +3,10 @@ const Results = ({ results }) => {
 		<>
 			{!!results.length && (
 				<details className="mb-4">
-					<summary>Best matching content (sent as context)</summary>
+					<summary>
+						Best matching content sent as context (check console for more
+						details)
+					</summary>
 					<ul className="list-group">
 						{results.map((result, index) => {
 							return (
