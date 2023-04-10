@@ -19,7 +19,10 @@ const handler = async (req) => {
 				input: query,
 			}),
 		});
+
+		console.log(response.status);
 		const { data } = await response.json();
+
 		const embedding = data[0].embedding;
 
 		const { data: chunks, error } = await supabaseAdmin.rpc(
@@ -37,6 +40,7 @@ const handler = async (req) => {
 		}
 		return new Response(JSON.stringify(chunks), { status: 200 });
 	} catch (error) {
+		console.log(error);
 		return new Response("Error", { status: 500 });
 	}
 };

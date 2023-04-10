@@ -146,7 +146,7 @@ export default function Home() {
 					})}
 				</section>
 			</main>
-			<footer class="container small">
+			<footer className="container small">
 				Resources:
 				<ul>
 					<li>
