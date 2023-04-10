@@ -178,9 +178,10 @@ export default function Home() {
 						<a href="https://supabase.com/">supabase </a>database.
 					</p>
 					<p>
-						When question is asked it is sent to OpenAI to calculate embedding
-						vector. Then query is sent to database to find 10 best matching
-						chunks with similarity threshold 0.78.
+						When the question is asked, it is sent to OpenAI to calculate the
+						embedding vector. Then the query is sent to the database to find the
+						10 best-matching chunks with a similarity threshold (cosine) of
+						0.78.
 					</p>
 					<p>
 						Then the results from database are sent to OpenAI as context
