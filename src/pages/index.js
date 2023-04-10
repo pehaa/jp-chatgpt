@@ -174,7 +174,7 @@ export default function Home() {
 						</a>{" "}
 						starting with <code>https://jetpack.com//support/</code>. I chunked
 						them into sections based on headings. Next, I sent them to OpenAI to
-						calculate embeddings vectors and saved them in a{" "}
+						calculate embedding vectors and saved them in a{" "}
 						<a href="https://supabase.com/">supabase </a>database.
 					</p>
 					<p>
@@ -206,7 +206,13 @@ export default function Home() {
 						<li>Prefer splitting your response into multiple paragraphs.</li>
 						<li>Output as markdown with code snippets if available. </li>
 					</ul>
-
+					<p>
+						<b>
+							Note that I asket GPT to rely solely on the provided context. It
+							still sometimes "hallucinates'. Re-asking the same questions
+							usually helps.
+						</b>
+					</p>
 					<a href="https://github.com/pehaa/jp-chatgpt" target="_blank">
 						GitHub repo
 					</a>
