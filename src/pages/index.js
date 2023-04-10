@@ -209,8 +209,8 @@ export default function Home() {
 					<p>
 						<b>
 							Note that I asket GPT to rely solely on the provided context. It
-							still sometimes "hallucinates'. Re-asking the same questions
-							usually helps.
+							still sometimes <em>hallucinates</em>. Re-asking the same
+							questions usually helps.
 						</b>
 					</p>
 					<a href="https://github.com/pehaa/jp-chatgpt" target="_blank">
