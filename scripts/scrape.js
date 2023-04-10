@@ -8,7 +8,7 @@ const CHUNK_SIZE = 300;
 const startPath = "/sitemap-1.xml";
 const supportPath = `https://jetpack.com/support/`;
 const blogPath = `https://jetpack.com/blog/`;
-const includeBlog = !true;
+const includeBlog = false;
 
 const getLinks = async () => {
 	const html = await axios.get(`${BASE_URL}${startPath}`);
@@ -27,7 +27,6 @@ const getLinks = async () => {
 const getContent = async (section) => {
 	let cleanedText = section.content.replace(/\s+/g, " ");
 	cleanedText = cleanedText.trim();
-	//console.log(cleanedText);
 	return {
 		...section,
 		content: cleanedText,
@@ -67,12 +66,6 @@ const getSections = async (url) => {
 		})
 		.get();
 
-	console.log("intro section", introSection);
-
-	const introSectionTitle = title[title.length - 1]?.match(/[a-z0-9]/i)
-		? title + "."
-		: title;
-
 	let sections = content
 		.find("h2, h3, summary")
 		.map((i, heading) => {
@@ -100,8 +93,6 @@ const getSections = async (url) => {
 		(el) => el.content.trim().length > el.sectionTitle.length + 10
 	);
 
-	console.log(sections.map((el) => el.sectionTitle));
-
 	return sections;
 };
 
@@ -116,7 +107,6 @@ const chunkContent = async (sectionObj) => {
 			const sentenceTokens = encode(sentence).length;
 			const chunkTextTokens = encode(chunkText).length;
 			if (chunkTextTokens + sentenceTokens > CHUNK_SIZE) {
-				//console.log(chunkText + "#######");
 				contentChunks.push(chunkText);
 				chunkText = "";
 			}
@@ -126,10 +116,8 @@ const chunkContent = async (sectionObj) => {
 				chunkText += sentence + " ";
 			}
 		}
-		//console.log(chunkText + "#######");
 		contentChunks.push(chunkText.trim());
 	} else {
-		//console.log(content + "#######");
 		contentChunks.push(content);
 	}
 

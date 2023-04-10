@@ -42,7 +42,7 @@ export const OpenAIStream = async (query, contextText) => {
 			role: ChatCompletionRequestMessageRoleEnum.User,
 			content: codeBlock`
             ${oneLine`
-              Answer my next question using only the above documentation.
+              Answer my next question using only the above Jetpack documentation.
               You must also follow the below rules when answering:
             `}
             ${oneLine`

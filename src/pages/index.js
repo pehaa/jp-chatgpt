@@ -4,18 +4,24 @@ import "bootstrap/dist/css/bootstrap.css";
 import Answer from "@/components/Answer";
 import Question from "@/components/Question";
 import Loading from "@/components/Loading";
+import Results from "@/components/Results";
 
 export default function Home() {
 	const [query, setQuery] = useState("");
 	const [answer, setAnswer] = useState("");
 	const [question, setQuestion] = useState("");
 	const [previousAnswers, setPreviousAnswers] = useState([]);
+	const [results, setResults] = useState([]);
 	const [loading, setLoading] = useState(false);
 
 	const handleAnswer = async () => {
-		setPreviousAnswers((prev) => [{ question, answer }, ...prev]);
+		setPreviousAnswers((prev) => [
+			{ question, answer, results: [...results] },
+			...prev,
+		]);
 		setLoading(true);
 		setAnswer("");
+		setResults([]);
 		setQuestion(query);
 		const searchResponse = await fetch("/api/search", {
 			method: "POST",
@@ -28,9 +34,10 @@ export default function Home() {
 		if (!searchResponse.ok) {
 			return;
 		}
-		const results = await searchResponse.json();
+		const response = await searchResponse.json();
+		setResults(response);
 
-		console.log("results", results);
+		console.log("results", response);
 
 		let tokenCount = 0;
 		let contextText = "";
@@ -96,8 +103,9 @@ export default function Home() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<main className="container py-4">
+				<h1 className="mb-4 h4">GPT based on Jetpack Support Pages</h1>
 				<div className="mb-4">
-					<label htmlFor="question">Question</label>
+					<label htmlFor="question">Question:</label>
 					<input
 						id="question"
 						type="text"
@@ -108,7 +116,7 @@ export default function Home() {
 
 					<button
 						type="button"
-						className="btn btn-primary"
+						className="btn btn-success"
 						onClick={handleAnswer}
 					>
 						Submit
@@ -116,19 +124,93 @@ export default function Home() {
 				</div>
 				<div>
 					<Question question={question} />
-					{loading ? <Loading /> : <Answer answer={answer} />}
+					{loading ? (
+						<Loading />
+					) : (
+						<>
+							<Answer answer={answer} />
+							<Results results={results} />
+						</>
+					)}
 				</div>
+				<hr />
 				<section className="small">
-					{previousAnswers.map(({ question, answer }, index) => {
+					{previousAnswers.map(({ question, answer, results }, index) => {
 						return (
 							<div key={index}>
 								<Question question={question} />
 								<Answer answer={answer} />
+								<Results results={results} />
 							</div>
 						);
 					})}
 				</section>
 			</main>
+			<footer class="container small">
+				Resources:
+				<ul>
+					<li>
+						<a
+							href="https://www.youtube.com/watch?v=RM-v7zoYQo0"
+							target="_blank"
+						>
+							How to create an OpenAI Q&A bot with ChatGPT API + embeddings
+						</a>
+					</li>
+					<li>
+						<a
+							href="https://www.youtube.com/watch?v=Yhtjd7yGGGA"
+							target="_blank"
+						>
+							ClippyGPT - How I Built Supabase’s OpenAI Doc Search (Embeddings)
+						</a>
+					</li>
+				</ul>
+				<div>
+					<p>
+						I scrapped pages from{" "}
+						<a href="https://jetpack.com/sitemap-1.xml">
+							https://jetpack.com/sitemap-1.xml
+						</a>{" "}
+						starting with <code>https://jetpack.com//support/</code>. I chunked
+						them into sections based on headings. Next, I sent them to OpenAI to
+						calculate embeddings vectors and saved them in a{" "}
+						<a href="https://supabase.com/">supabase </a>database.
+					</p>
+					<p>
+						When question is asked it is sent to OpenAI to calculate embedding
+						vector. Then query is sent to database to find 10 best matching
+						chunks with similarity threshold 0.78.
+					</p>
+					<p>
+						Then the results from database are sent to OpenAI as context
+						(Jetpack documentation) together with question and rules.
+					</p>
+					<ul>
+						<li>
+							You are a very enthusiastic Jetpack AI who loves to help people!
+							Given the following information from the Jetpack documentation,
+							answer the user's question using only that information, outputted
+							in markdown format. If you are unsure and the answer is not
+							explicitly written in the documentation, say "Sorry, I don't know
+							how to help with that." Include related code snippets if
+							available.{" "}
+						</li>
+						<li>
+							Do not make up answers that are not provided in the documentation.
+						</li>
+						<li>
+							Do not make up answers that are not provided in the documentation.
+						</li>
+						<li>Prefer splitting your response into multiple paragraphs.</li>
+						<li>Output as markdown with code snippets if available. </li>
+					</ul>
+
+					<a href="https://github.com/pehaa/jp-chatgpt" target="_blank">
+						GitHub repo
+					</a>
+				</div>
+			</footer>
 		</>
 	);
 }
